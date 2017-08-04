@@ -7,9 +7,11 @@ module Microplane
       new.evaluate(code).pop
     end
 
-    attr_reader :stack
-    def initialize(inj_stack = [])
-      @stack = inj_stack
+    attr_reader :stack, :dictionary
+
+    def initialize
+      @stack = []
+      @dictionary = initial_dictionary
     end
 
     def evaluate(code)
@@ -24,31 +26,30 @@ module Microplane
 
     private
 
+    def initial_dictionary
+      {
+        '+' => -> { f_add },
+        '-' => -> { f_sub },
+        '*' => -> { f_mult },
+        '/' => -> { f_div },
+        '%' => -> { f_mod },
+        '<' => -> { f_lt },
+        '>' => -> { f_gt },
+        '=' => -> { f_eq },
+      }
+    end
+
     def push(obj)
       stack << obj
     end
 
     def parse(words)
       words.each do |w|
-        case w
-        when '+'
-          f_add
-        when '-'
-          f_sub
-        when '*'
-          f_mult
-        when '/'
-          f_div
-        when '%'
-          f_mod
-        when '<'
-          f_lt
-        when '>'
-          f_gt
-        when '='
-          f_eq
+        func = dictionary[w]
+        if func
+          push func.call
         else
-          byte = '0'.getbyte(0)
+          byte = w.getbyte(0)
           if byte >= 48 && byte <= 57
             push w.to_i
           else
@@ -59,35 +60,35 @@ module Microplane
     end
 
     def f_add
-      push(pop + pop)
+      pop + pop
     end
 
     def f_sub
-      push(pop - pop)
+      pop - pop
     end
 
     def f_mult
-      push(pop * pop)
+      pop * pop
     end
 
     def f_div
-      push(pop / pop)
+      pop / pop
     end
 
     def f_mod
-      push(pop % pop)
+      pop % pop
     end
 
     def f_lt
-      push(pop < pop)
+      pop < pop
     end
 
     def f_gt
-      push(pop > pop)
+      pop > pop
     end
 
     def f_eq
-      push(pop == pop)
+      pop == pop
     end
   end
 end

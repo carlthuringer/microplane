@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Base module
 module Microplane
   # Your code goes here...
 end
