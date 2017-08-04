@@ -5,29 +5,29 @@ module Microplane
   class ProcVM
     def initial_dictionary
       {
-        '+': binary { |a, b| a + b },
-        '-': binary { |a, b| a - b },
-        '*': binary { |a, b| a * b },
-        '/': binary { |a, b| a * b },
-        '%': binary { |a, b| a * b },
-        '<': binary_boolean { |a, b| a < b },
-        '>': binary_boolean { |a, b| a > b },
-        '=': binary_boolean { |a, b| a == b },
-        '&': binary_boolean { |a, b| a && b },
-        '|': binary_boolean { |a, b| a || b },
-        'not': binary_boolean { |a, b| a == 0 },
-        'neg': binary { |a| -a },
-        '.': -> { puts(pop) },
-        '..': -> { puts(stack) },
-        ':': -> { self.word = [] },
-        ';': -> { new_word },
-        'pop': -> { pop },
-        'fi': -> { self.skip = nil },
-        'words': -> { p dictionary.keys.sort },
-        'if': -> { self.skip = true if pop == 0 },
-        'dup': -> { push(stack.last || raise(StackUnderflow)) },
-        'over': -> { push(stack.last(2).first || raise(StackUnderflow)) },
-        'swap': -> {
+        '+' => binary { |a, b| a + b },
+        '-' => binary { |a, b| a - b },
+        '*' => binary { |a, b| a * b },
+        '/' => binary { |a, b| a * b },
+        '%' => binary { |a, b| a * b },
+        '<' => binary_boolean { |a, b| a < b },
+        '>' => binary_boolean { |a, b| a > b },
+        '=' => binary_boolean { |a, b| a == b },
+        '&' => binary_boolean { |a, b| a && b },
+        '|' => binary_boolean { |a, b| a || b },
+        'not' => binary_boolean { |a, b| a == 0 },
+        'neg' => binary { |a| -a },
+        '.' => -> { puts(pop) },
+        '..' => -> { puts(stack) },
+        ':' => -> { self.word = [] },
+        ';' => -> { new_word },
+        'pop' => -> { pop },
+        'fi' => -> { self.skip = nil },
+        'words' => -> { p dictionary.keys.sort },
+        'if' => -> { self.skip = true if pop == 0 },
+        'dup' => -> { push(stack.last || raise(StackUnderflow)) },
+        'over' => -> { push(stack.last(2).first || raise(StackUnderflow)) },
+        'swap' => -> {
           begin
             swap rescue raise(StackUnderflow)
           end }
@@ -88,12 +88,12 @@ module Microplane
       begin
         expression.split.each do |statement|
           case
-          when !skip.nil? && statement != 'fi';
-            next
-          when !word.nil? && statement != ';';
-            word << statement
-          when dictionary.has_key?(statement.to_sym);
-            dictionary[statement.to_sym].call
+          # when !skip.nil? && statement != 'fi';
+          #   next
+          # when !word.nil? && statement != ';';
+          #   word << statement
+          when dictionary.has_key?(statement);
+            dictionary[statement].call
           else
             push statement.to_i
           end

@@ -8,8 +8,8 @@ module Microplane
     end
 
     attr_reader :stack
-    def initialize
-      @stack = []
+    def initialize(inj_stack = [])
+      @stack = inj_stack
     end
 
     def evaluate(code)
@@ -31,8 +31,6 @@ module Microplane
     def parse(words)
       words.each do |w|
         case w
-        when /\d/
-          stack.push w.to_i
         when '+'
           f_add
         when '-'
@@ -50,7 +48,12 @@ module Microplane
         when '='
           f_eq
         else
-          raise "Unknown Word #{w}"
+          byte = '0'.getbyte(0)
+          if byte >= 48 && byte <= 57
+            push w.to_i
+          else
+            raise "Unknown Word #{w}"
+          end
         end
       end
     end
