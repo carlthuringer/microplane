@@ -56,4 +56,31 @@ RSpec.describe(Microplane::VM) do
       expect(subject.pop).to eq(true)
     end
   end
+
+  describe "&" do
+    it "Calculates AND of two inputs" do
+      subject.evaluate("true true =")
+    end
+  end
+
+  describe "true" do
+    it "Puts true on the stack" do
+      subject.evaluate("true")
+      expect(subject.pop).to eq(true)
+    end
+  end
+
+  describe "false" do
+    it "Puts false on the stack" do
+      subject.evaluate("false")
+      expect(subject.pop).to eq(false)
+    end
+  end
+
+  describe "|" do
+    it "Calculates the OR of two inputs" do
+      subject.evaluate("false false |")
+      expect(subject.pop).to eq(false)
+    end
+  end
 end
