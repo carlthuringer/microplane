@@ -83,4 +83,26 @@ RSpec.describe(Microplane::VM) do
       expect(subject.pop).to eq(false)
     end
   end
+
+  describe "not" do
+    it "Inverts the truthiness of the input" do
+      subject.evaluate("false not")
+      expect(subject.pop).to eq(true)
+    end
+  end
+
+  describe "neg" do
+    it "Negates the input" do
+      subject.evaluate("1 neg")
+      expect(subject.pop).to eq(-1)
+    end
+  end
+
+  describe ":" do
+    it "Defines a new word" do
+      subject.evaluate(": foo 123 ;")
+      subject.evaluate("foo")
+      expect(subject.pop).to eq(123)
+    end
+  end
 end

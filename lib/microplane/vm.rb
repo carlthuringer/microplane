@@ -54,6 +54,10 @@ module Microplane
         false
       when '|'
         pop || pop
+      when 'not'
+        !pop
+      when 'neg'
+        (-pop)
       else
         byte = w.getbyte(0)
         raise "Unknown Word #{w}" unless byte >= 48 && byte <= 57
