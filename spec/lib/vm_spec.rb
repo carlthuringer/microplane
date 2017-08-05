@@ -104,5 +104,18 @@ RSpec.describe(Microplane::VM) do
       subject.evaluate("foo")
       expect(subject.pop).to eq(123)
     end
+
+    it "Defines a more complex new word" do
+      subject.evaluate(": add2 2 + ;")
+      subject.evaluate("3 add2")
+      expect(subject.pop).to eq(5)
+    end
+
+    it "Clears previous definitions" do
+      subject.evaluate(": add2 2 + ;")
+      subject.evaluate(": add5 5 + ;")
+      subject.evaluate("3 add5")
+      expect(subject.pop).to eq(8)
+    end
   end
 end

@@ -9,13 +9,18 @@ module Microplane
 
     attr_reader :stack
 
-    def initialize(inj_stack = [])
-      @stack = inj_stack
+    def initialize
+      @stack = []
+      @new_word = false
+      @word_definition = []
+      @dictionary = {}
     end
 
     def evaluate(code)
       code.split.each do |w|
-        push parse(w)
+        next parse(w) unless @new_word
+        next commit_new_word if w == ';'
+        @word_definition.push(w)
       end
       self
     end
@@ -26,6 +31,13 @@ module Microplane
 
     private
 
+    def commit_new_word
+      word = @word_definition.shift
+      @dictionary[word] = @word_definition.join(" ")
+      @word_definition = []
+      @new_word = false
+    end
+
     def push(obj)
       stack << obj
     end
@@ -33,35 +45,41 @@ module Microplane
     def parse(w)
       case w
       when '+'
-        pop + pop
+        push(pop + pop)
       when '-'
-        pop - pop
+        push(pop - pop)
       when '*'
-        pop * pop
+        push(pop * pop)
       when '/'
-        pop / pop
+        push(pop / pop)
       when '%'
-        pop % pop
+        push(pop % pop)
       when '<'
-        pop < pop
+        push(pop < pop)
       when '>'
-        pop > pop
+        push(pop > pop)
       when '='
-        pop == pop
+        push(pop == pop)
       when 'true'
-        true
+        push(true)
       when 'false'
-        false
+        push(false)
       when '|'
-        pop || pop
+        push(pop || pop)
       when 'not'
-        !pop
+        push(!pop)
       when 'neg'
-        (-pop)
+        push(-pop)
+      when ':'
+        @new_word = true
       else
-        byte = w.getbyte(0)
-        raise "Unknown Word #{w}" unless byte >= 48 && byte <= 57
-        w.to_i
+        if w.getbyte(0) >= 48 && w.getbyte(0) <= 57
+          push w.to_i
+        elsif @dictionary.key?(w)
+          evaluate(@dictionary[w])
+        else
+          raise "Unknown Word #{w}"
+        end
       end
     end
   end
