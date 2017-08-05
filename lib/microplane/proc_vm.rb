@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Microplane
   # This VM is copied from a 64-line forth interpreter snippet found on github. [fork](https://gist.github.com/carlthuringer/3186433a8e17c0358aded37759df316d)
   # The interpreter doesn't seem to be complete, but has a good baseline of functionality.
@@ -15,8 +17,8 @@ module Microplane
         '=' => binary_boolean { |a, b| a == b },
         '&' => binary_boolean { |a, b| a && b },
         '|' => binary_boolean { |a, b| a || b },
-        'not' => binary_boolean { |a, b| a == 0 },
-        'neg' => binary { |a| -a },
+        'not' => binary_boolean { |a, _b| a == 0 },
+        'neg' => binary(&:-@),
         '.' => -> { puts(pop) },
         '..' => -> { puts(stack) },
         ':' => -> { self.word = [] },
@@ -27,10 +29,15 @@ module Microplane
         'if' => -> { self.skip = true if pop == 0 },
         'dup' => -> { push(stack.last || raise(StackUnderflow)) },
         'over' => -> { push(stack.last(2).first || raise(StackUnderflow)) },
-        'swap' => -> {
+        'swap' => lambda {
           begin
-            swap rescue raise(StackUnderflow)
-          end }
+            begin
+              swap
+            rescue
+              raise(StackUnderflow)
+            end
+          end
+        }
       }
     end
 
@@ -49,7 +56,7 @@ module Microplane
     end
 
     def pop
-      stack.pop || raise(StackUnderflow);
+      stack.pop || raise(StackUnderflow)
     end
 
     def push(expression)
@@ -65,11 +72,11 @@ module Microplane
     end
 
     def unary_boolean
-      -> { push((yield pop) ? 1 : 0) }
+      -> { push(yield pop ? 1 : 0) }
     end
 
     def binary_boolean
-      -> { push((yield pop, pop) ? 1 : 0) }
+      -> { push(yield pop, pop ? 1 : 0) }
     end
 
     def swap
@@ -77,9 +84,10 @@ module Microplane
     end
 
     def new_word
-      raise EmptyWord if word.size < 1
+      raise EmptyWord if word.empty?
       raise NestedDefinition if word.include? ':'
-      name, expression = word.shift, word.join(' ')
+      name = word.shift
+      expression = word.join(' ')
       dictionary[name] = -> { parse(expression) }
       self.word = nil
     end
@@ -87,20 +95,15 @@ module Microplane
     def parse(expression)
       begin
         expression.split.each do |statement|
-          case
-          # when !skip.nil? && statement != 'fi';
-          #   next
-          # when !word.nil? && statement != ';';
-          #   word << statement
-          when dictionary.has_key?(statement);
+          if dictionary.key?(statement)
             dictionary[statement].call
           else
             push statement.to_i
           end
         end
       rescue
-        puts "Error: #{$!}"
-        puts "Backtrace: #{$!.backtrace.join("\n")}"
+        puts "Error: #{$ERROR_INFO}"
+        puts "Backtrace: #{$ERROR_INFO.backtrace.join("\n")}"
       end
       self
     end

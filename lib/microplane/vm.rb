@@ -33,7 +33,7 @@ module Microplane
 
     def commit_new_word
       word = @word_definition.shift
-      @dictionary[word] = @word_definition.join(" ")
+      @dictionary[word] = @word_definition.join(' ')
       @word_definition = []
       @new_word = false
     end
