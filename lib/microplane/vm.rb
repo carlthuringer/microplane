@@ -12,12 +12,14 @@ module Microplane
     def initialize
       @stack = []
       @new_word = false
+      @skip = false
       @word_definition = []
       @dictionary = {}
     end
 
     def evaluate(code)
       code.split.each do |w|
+        next if @skip == true && w != 'fi'
         next parse(w) unless @new_word
         next commit_new_word if w == ';'
         @word_definition.push(w)
@@ -72,6 +74,21 @@ module Microplane
         push(-pop)
       when ':'
         @new_word = true
+      when 'pop'
+        pop
+      when 'if'
+        @skip = true
+      when 'fi'
+        @skip = false
+      when 'dup'
+        popped = pop
+        push(popped)
+        push(popped)
+      when 'over'
+        first = pop
+        second = pop
+        push first
+        push second
       else
         if w.getbyte(0) >= 48 && w.getbyte(0) <= 57
           push w.to_i

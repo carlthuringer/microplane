@@ -100,7 +100,7 @@ RSpec.describe(Microplane::VM) do
     end
   end
 
-  describe ':' do
+  describe ': ... ;' do
     it 'Defines a new word' do
       subject.evaluate(': foo 123 ;')
       subject.evaluate('foo')
@@ -118,6 +118,27 @@ RSpec.describe(Microplane::VM) do
       subject.evaluate(': add5 5 + ;')
       subject.evaluate('3 add5')
       expect(subject.pop).to eq(8)
+    end
+  end
+
+  describe 'pop' do
+    it 'Pops something off the stack' do
+      subject.evaluate('1 5 pop')
+      expect(subject.pop).to eq(1)
+    end
+  end
+
+  describe 'if' do
+    it 'Skips over the section if the element on the stack is truthy' do
+      subject.evaluate('true if 123 fi 456')
+      expect(subject.pop).to eq(456)
+    end
+  end
+
+  describe 'dup' do
+    it 'Duplicates the top element of the stack' do
+      subject.evaluate('2 dup *')
+      expect(subject.pop).to eq(4)
     end
   end
 end
