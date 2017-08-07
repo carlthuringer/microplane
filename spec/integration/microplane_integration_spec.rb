@@ -33,4 +33,15 @@ RSpec.describe('Integration Specs') do
     vm.evaluate('2 3 -')
     expect(vm.pop).to eq(1)
   end
+
+  describe 'extensibility' do
+    Class.new do
+      @dictionary = %(each)
+
+      def do_each
+        fn = pop
+        pop.each { |item| push(item); evaluate(fn) }
+      end
+    end
+  end
 end
