@@ -7,5 +7,5 @@ end
 
 require 'microplane/version'
 require 'microplane/vm'
+require 'microplane/lib/std'
 require 'microplane/errors'
-require 'microplane/proc_vm'

@@ -11,18 +11,22 @@ module Microplane
 
     def initialize
       @stack = []
-      @new_word = false
       @skip = false
-      @word_definition = []
       @dictionary = {}
+      @libraries = []
+      add_library Lib::Std
+    end
+
+    def add_library(lib)
+      lib.load_words(self)
     end
 
     def evaluate(code)
-      code.split.each do |w|
+      tokens = code.split
+      return define_new_word(tokens) if tokens.first == ':'
+      tokens.each do |w|
         next if @skip == true && w != 'fi'
-        next parse(w) unless @new_word
-        next commit_new_word if w == ';'
-        @word_definition.push(w)
+        parse(w)
       end
       self
     end
@@ -33,11 +37,9 @@ module Microplane
 
     private
 
-    def commit_new_word
-      word = @word_definition.shift
-      @dictionary[word] = @word_definition.join(' ')
-      @word_definition = []
-      @new_word = false
+    def define_new_word(tokens)
+      word = tokens[1]
+      @dictionary[word] = tokens[2..-2].join(' ')
     end
 
     def push(obj)
@@ -45,59 +47,15 @@ module Microplane
     end
 
     def parse(w)
-      case w
-      when '+'
-        push(pop + pop)
-      when '-'
-        push(pop - pop)
-      when '*'
-        push(pop * pop)
-      when '/'
-        push(pop / pop)
-      when '%'
-        push(pop % pop)
-      when '<'
-        push(pop < pop)
-      when '>'
-        push(pop > pop)
-      when '='
-        push(pop == pop)
-      when 'true'
-        push(true)
-      when 'false'
-        push(false)
-      when '|'
-        push(pop || pop)
-      when 'not'
-        push(!pop)
-      when 'neg'
-        push(-pop)
-      when ':'
-        @new_word = true
-      when 'pop'
-        pop
-      when 'if'
-        @skip = true
-      when 'fi'
-        @skip = false
-      when 'dup'
-        popped = pop
-        push(popped)
-        push(popped)
-      when 'over'
-        first = pop
-        second = pop
-        push first
-        push second
-      else
-        if w.getbyte(0) >= 48 && w.getbyte(0) <= 57
-          push w.to_i
-        elsif @dictionary.key?(w)
-          evaluate(@dictionary[w])
-        else
-          raise "Unknown Word #{w}"
-        end
-      end
+      return push(w.to_i) if number?(w)
+      word = @dictionary[w]
+      raise "Unknown Word #{w}" unless word
+      return word.call if word.is_a?(Proc)
+      evaluate(word)
+    end
+
+    def number?(w)
+      w.getbyte(0) >= 48 && w.getbyte(0) <= 57
     end
   end
 end

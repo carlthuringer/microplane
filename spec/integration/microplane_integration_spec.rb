@@ -35,13 +35,20 @@ RSpec.describe('Integration Specs') do
   end
 
   describe 'extensibility' do
-    Class.new do
-      @dictionary = %(each)
+    let(:each_lib) do
+      Class.new do
+        @dictionary = %(each)
 
-      def do_each
-        fn = pop
-        pop.each { |item| push(item); evaluate(fn) }
+        def do_each
+          fn = pop
+          pop.each { |item| push(item); evaluate(fn) }
+        end
       end
     end
+
+    it 'is possible to add new libraries to the VM' do
+
+    end
+
   end
 end
